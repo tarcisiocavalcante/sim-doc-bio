@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -468,9 +469,9 @@
         function animarIons(atpAtivo, contraGradiente) {
             const intra = document.getElementById('intracellular');
             if (!atpAtivo || !contraGradiente) {
-                // Falha: Lise
+                // Falha visual: lise (a classe é adicionada no setTimeout)
             } else {
-                // Sucesso: Move íons para fora
+                // Sucesso: Move íons para fora (meio extracelular)
                 const extra = document.getElementById('extracellular');
                 criarIon(extra, true);
                 criarIon(extra, true);
@@ -509,7 +510,9 @@
             document.getElementById('feedback-overlay').style.display = 'none';
             document.getElementById('intracellular').classList.remove('lysis-animation');
             const intra = document.getElementById('intracellular');
+            // Reset do texto preservando o rigor biológico
             intra.innerHTML = 'Meio Intracelular (Alta Pressão Osmótica - Perigo de Lise)';
+            inicializarCenario(); // Recria íons
         }
 
         function salvarPersistencia() {
@@ -526,3 +529,5 @@
     </script>
 </body>
 </html>
+
+```
