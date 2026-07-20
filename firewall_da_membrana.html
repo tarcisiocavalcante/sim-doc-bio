@@ -1,8 +1,9 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aula Mestre: Tema 1 - Firewall da Membrana</title>
     <!-- BioEngine SIM-DOC-BIO | Engenharia de Software Educacional -->
     <!-- Ref: MATRIZ_20_SIMULACOES.xlsx -->
@@ -17,9 +18,9 @@
             --membrane: #f39c12;
         }
         
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; touch-action: manipulation; }
         
-        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--primary); height: 100vh; overflow: hidden; }
+        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--primary); height: 100vh; overflow: hidden; /* Evita pull-to-refresh mobile */ touch-action: none; }
 
         /* --- TELA DE LOGIN --- */
         #login-screen {
@@ -27,7 +28,7 @@
             background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 100;
         }
         .login-card {
-            background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 100%; max-width: 400px;
+            background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; max-width: 400px;
         }
         .login-card h2 { margin-top: 0; text-align: center; color: var(--primary); }
         .form-group { margin-bottom: 15px; }
@@ -41,7 +42,7 @@
         #workspace { display: none; width: 100vw; height: 100vh; flex-direction: row; }
         
         /* Lateral */
-        #sidebar { width: 300px; background: white; border-right: 2px solid #ddd; padding: 20px; display: flex; flex-direction: column; }
+        #sidebar { width: 300px; background: white; border-right: 2px solid #ddd; padding: 20px; display: flex; flex-direction: column; z-index: 20; }
         .briefing { background: #ecf0f1; padding: 15px; border-left: 4px solid var(--secondary); border-radius: 4px; margin-bottom: 20px; font-size: 14px; }
         .inventory { flex: 1; border: 2px dashed #ccc; border-radius: 8px; padding: 10px; background: #fafafa; }
         .inventory h3 { font-size: 14px; margin-top: 0; text-align: center; }
@@ -49,13 +50,14 @@
         .draggable-item {
             background: var(--primary); color: white; padding: 10px; text-align: center; border-radius: 4px;
             cursor: grab; margin-bottom: 10px; user-select: none; font-size: 12px; font-weight: bold;
+            touch-action: none; /* Fundamental para touch events customizados funcionarem sem scroll */
         }
         .draggable-item:active { cursor: grabbing; }
 
         #btn-simular { background: var(--primary); color: white; margin-top: 20px; }
 
         /* Área Principal */
-        #main-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        #main-area { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 10; }
         #extracellular { flex: 1; background: var(--cell-out); display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; font-weight: bold; color: #555; position: relative;}
         #intracellular { flex: 1; background: var(--cell-in); display: flex; justify-content: center; align-items: flex-start; padding-top: 20px; font-weight: bold; color: #555; position: relative; overflow: hidden;}
         
@@ -69,7 +71,7 @@
             width: 80px; height: 60px; border: 2px dashed #fff; border-radius: 8px; background: rgba(255,255,255,0.3);
             display: flex; justify-content: center; align-items: center; transition: all 0.3s;
         }
-        .drop-target.hover { background: rgba(255,255,255,0.7); transform: scale(1.05); }
+        .drop-target.hover { background: rgba(255,255,255,0.7); transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.8); }
         
         .placed-pump {
             width: 100%; height: 100%; background: var(--primary); color: white; border-radius: 8px;
@@ -87,7 +89,7 @@
         /* --- MODAL DE CONFIGURAÇÃO --- */
         #config-modal {
             display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; padding: 20px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 50; width: 300px;
+            background: white; padding: 20px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 50; width: 90%; max-width: 300px;
         }
         #config-modal h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
         
@@ -96,7 +98,7 @@
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; flex-direction: column;
         }
-        .feedback-box { background: white; padding: 30px; border-radius: 8px; text-align: center; max-width: 400px; }
+        .feedback-box { background: white; padding: 30px; border-radius: 8px; text-align: center; max-width: 400px; width: 90%; }
         .feedback-box.fail h2 { color: var(--danger); }
         .feedback-box.success h2 { color: var(--secondary); }
 
@@ -104,6 +106,15 @@
         .lysis-animation { animation: shake 0.5s infinite, expand 2s forwards; }
         @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
         @keyframes expand { to { background-color: #ffb8b8; } }
+
+        /* RESPONSIVIDADE PARA SMARTPHONES (Suporte Híbrido Mobile) */
+        @media (max-width: 768px) {
+            #workspace { flex-direction: column; }
+            #sidebar { width: 100%; border-right: none; border-bottom: 2px solid #ddd; padding: 10px; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: stretch; height: auto; max-height: 40vh; overflow-y: auto; }
+            .briefing { margin-bottom: 10px; width: 100%; font-size: 12px; padding: 10px; }
+            .inventory { width: 48%; min-height: 80px; padding: 5px; }
+            #btn-simular { width: 48%; margin-top: 0; align-self: center; height: 100%; min-height: 80px;}
+        }
     </style>
 </head>
 <body>
@@ -134,13 +145,14 @@
         <!-- Sidebar -->
         <div id="sidebar">
             <div class="briefing">
-                <strong>Briefing Operacional:</strong><br><br>
-                Estabilize o meio intracelular. Impeça a lise celular por excesso de íons Na+.<br><br>
-                <em>Referência: MATRIZ_20_SIMULACOES.xlsx (Tema 1)</em>
+                <strong>Briefing Operacional:</strong><br>
+                Estabilize o meio intracelular. Impeça a lise celular por excesso de íons Na+.<br>
+                <em>Referência: MATRIZ_20_SIMULACOES.xlsx</em>
             </div>
             
             <div class="inventory">
                 <h3>Equipamentos</h3>
+                <!-- Configurado para Drag and Drop nativo e Touch Events Customizados -->
                 <div class="draggable-item" draggable="true" id="bomba-ions" ondragstart="drag(event)">
                     Bomba de Íons
                 </div>
@@ -227,9 +239,10 @@
             document.getElementById('workspace').style.display = 'flex';
             
             inicializarCenario();
+            configurarSuporteTouch();
         }
 
-        // --- MECÂNICA DE ARRASTAR E SOLTAR (PACKET TRACER STYLE) ---
+        // --- MECÂNICA DE ARRASTAR E SOLTAR (DESKTOP) ---
         function allowDrop(ev) {
             ev.preventDefault();
             ev.target.classList.add('hover');
@@ -243,23 +256,89 @@
             ev.preventDefault();
             const slot = document.getElementById('slot');
             slot.classList.remove('hover');
-            
-            if (!isPumpPlaced) {
-                isPumpPlaced = true;
-                const draggable = document.getElementById('bomba-ions');
-                draggable.style.display = 'none'; // Remove do inventário
-                
-                // Cria a bomba instalada
-                slot.innerHTML = '<div class="placed-pump" onclick="abrirConfig()">Bomba Instalada<br>(Clique para Configurar)</div>';
-                slot.style.border = "none";
-                slot.style.background = "transparent";
-            }
+            instalarBomba();
         }
 
-        // Slot remover highlight on dragleave
         document.getElementById('slot').addEventListener('dragleave', function(e) {
             e.target.classList.remove('hover');
         });
+
+        // --- SUPORTE HÍBRIDO A EVENTOS DE TOQUE (MOBILE) ---
+        function configurarSuporteTouch() {
+            const bomba = document.getElementById('bomba-ions');
+            const slot = document.getElementById('slot');
+
+            bomba.addEventListener('touchstart', function(e) {
+                // Previne o comportamento padrão (scroll) para permitir movimentação livre
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = bomba.getBoundingClientRect();
+                
+                // Calcula o offset de onde o dedo tocou no elemento
+                bomba.dataset.offsetX = touch.clientX - rect.left;
+                bomba.dataset.offsetY = touch.clientY - rect.top;
+
+                // Muda o posicionamento para fixed para flutuar pela tela
+                bomba.style.position = 'fixed';
+                bomba.style.zIndex = '1000';
+                bomba.style.width = rect.width + 'px';
+                bomba.style.margin = '0';
+                
+                bomba.style.left = (touch.clientX - bomba.dataset.offsetX) + 'px';
+                bomba.style.top = (touch.clientY - bomba.dataset.offsetY) + 'px';
+            }, { passive: false });
+
+            bomba.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                bomba.style.left = (touch.clientX - bomba.dataset.offsetX) + 'px';
+                bomba.style.top = (touch.clientY - bomba.dataset.offsetY) + 'px';
+
+                // Verifica colisão visual com o slot
+                const slotRect = slot.getBoundingClientRect();
+                if (touch.clientX >= slotRect.left && touch.clientX <= slotRect.right &&
+                    touch.clientY >= slotRect.top && touch.clientY <= slotRect.bottom) {
+                    slot.classList.add('hover');
+                } else {
+                    slot.classList.remove('hover');
+                }
+            }, { passive: false });
+
+            bomba.addEventListener('touchend', function(e) {
+                const touch = e.changedTouches[0];
+                const slotRect = slot.getBoundingClientRect();
+                slot.classList.remove('hover');
+
+                // Verifica se o toque final foi solto dentro da área do slot
+                if (touch.clientX >= slotRect.left && touch.clientX <= slotRect.right &&
+                    touch.clientY >= slotRect.top && touch.clientY <= slotRect.bottom) {
+                    instalarBomba();
+                } else {
+                    // Volta a bomba pro inventário (Snap back)
+                    bomba.style.position = 'static';
+                    bomba.style.zIndex = 'auto';
+                    bomba.style.width = 'auto';
+                    bomba.style.margin = '0 0 10px 0';
+                }
+            });
+        }
+
+        // --- INSTALAÇÃO DA BOMBA ---
+        function instalarBomba() {
+            if (!isPumpPlaced) {
+                isPumpPlaced = true;
+                const draggable = document.getElementById('bomba-ions');
+                draggable.style.display = 'none'; // Esconde do inventário
+                
+                const slot = document.getElementById('slot');
+                slot.innerHTML = '<div class="placed-pump" onclick="abrirConfig()">Bomba Instalada<br>(Toque p/ Configurar)</div>';
+                slot.style.border = "none";
+                slot.style.background = "transparent";
+                slot.style.transform = "scale(1)"; // Reset de animação do hover
+                
+                abrirConfig(); // Abre modal de configuração automaticamente como UX de agilidade
+            }
+        }
 
         // --- CONFIGURAÇÃO DA BOMBA ---
         function abrirConfig() {
@@ -297,16 +376,19 @@
             ion.className = 'na-ion';
             ion.innerText = 'Na+';
             
-            const w = container.clientWidth - 20;
-            const h = container.clientHeight - 20;
-            const left = Math.random() * w;
-            const top = Math.random() * h;
-            
-            ion.style.left = left + 'px';
-            ion.style.top = top + 'px';
-            
-            container.appendChild(ion);
-            ions.push({ el: ion, isExtra: isExtra });
+            // Timeout curto pra dar tempo do render gerar dimensões exatas na tela do celular
+            setTimeout(() => {
+                const w = container.clientWidth - 30;
+                const h = container.clientHeight - 30;
+                const left = (Math.random() * w) + 10;
+                const top = (Math.random() * h) + 10;
+                
+                ion.style.left = left + 'px';
+                ion.style.top = top + 'px';
+                
+                container.appendChild(ion);
+                ions.push({ el: ion, isExtra: isExtra });
+            }, 50);
         }
 
         // --- MOTOR LÓGICO (Processo, Falha, Solução) ---
@@ -325,7 +407,6 @@
             const atpAtivo = pumpConfig.atp === 'sim';
             const contraGradiente = pumpConfig.dir === 'contra';
 
-            // Simulação visual básica
             animarIons(atpAtivo, contraGradiente);
 
             setTimeout(() => {
@@ -337,7 +418,7 @@
                 } else {
                     // FALHA: Acúmulo e Lise
                     failCount++;
-                    let motivo = !atpAtivo ? "Tentou usar difusão simples/facilitada para íons em excesso no meio externo." : "Bambeou os íons a favor do gradiente, inundando a célula.";
+                    let motivo = !atpAtivo ? "Tentou usar difusão simples/facilitada para íons em excesso no meio externo." : "Bambeou os íons a favor do gradiente, inundando a célula de forma ativa.";
                     sessionData.log.falhas.push({ tentativa: failCount, config: {...pumpConfig}, motivo: motivo });
                     
                     document.getElementById('intracellular').classList.add('lysis-animation');
@@ -352,11 +433,11 @@
             
             if (!atpAtivo || !contraGradiente) {
                 // Erro: Íons entram na célula
-                for(let i=0; i<10; i++) {
+                for(let i=0; i<8; i++) {
                     criarIon(intra, false);
                 }
             } else {
-                // Sucesso: Íons se movem para fora (visualmente estáticos no exterior ou pequenos ajustes)
+                // Sucesso: Mais íons movidos para o meio extracelular
                 const extra = document.getElementById('extracellular');
                 criarIon(extra, true);
                 criarIon(extra, true);
@@ -376,7 +457,7 @@
             const btn = document.getElementById('btn-feedback');
             if (isSuccess) {
                 btn.innerText = "Finalizar e Salvar";
-                btn.onclick = () => window.location.reload(); // Encerra o lab
+                btn.onclick = () => window.location.reload(); 
             } else {
                 btn.innerText = "Reconfigurar";
                 btn.onclick = resetarTentativa;
@@ -386,7 +467,7 @@
         function resetarTentativa() {
             document.getElementById('feedback-overlay').style.display = 'none';
             document.getElementById('intracellular').classList.remove('lysis-animation');
-            // Remove íons extras que entraram
+            // Remove íons extras que entraram pela falha
             const intra = document.getElementById('intracellular');
             intra.innerHTML = 'Meio Intracelular (Perigo de Acúmulo)';
         }
@@ -398,7 +479,8 @@
             
             try {
                 localStorage.setItem(key, dataString);
-                console.log("[SIM-DOC-BIO] Dados salvos localmente com sucesso. Status: Pendente para sincronização espelho.");
+                console.log("[SIM-DOC-BIO] Dados salvos localmente com sucesso no localStorage.");
+                console.log("Carga útil armazenada para sincronização espelho:", dataString);
             } catch (e) {
                 console.error("Erro ao salvar no localStorage: ", e);
             }
@@ -406,3 +488,5 @@
     </script>
 </body>
 </html>
+
+```
