@@ -1,4 +1,3 @@
-<!--firewall da membrana-->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -38,10 +37,22 @@
         .btn-primary { background: var(--secondary); color: white; }
         .btn-primary:hover { background: #128f76; }
 
-        /* --- WORKSPACE LAYOUT FULL-VIEW --- */
+        /* --- BRIEFING MODAL INICIAL --- */
+        #intro-modal {
+            display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85); z-index: 90; justify-content: center; align-items: center; padding: 20px;
+        }
+        .intro-card {
+            background: white; padding: 30px; border-radius: 8px; max-width: 500px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-top: 5px solid var(--secondary);
+        }
+        .intro-card h3 { margin-top: 0; color: var(--primary); font-size: 20px; }
+        .intro-card p { font-size: 14px; line-height: 1.5; color: #444; }
+
+        /* --- WORKSPACE FULL-VIEW --- */
         #workspace { display: none; width: 100vw; height: 100vh; flex-direction: column; position: relative; }
         
-        /* Topo: Controles e Informações Sutis */
+        /* Topo: Controles e Status Sutil */
         #top-bar {
             height: 50px; background: white; border-bottom: 2px solid #ddd; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 30;
         }
@@ -71,12 +82,12 @@
         }
         
         .drop-target {
-            width: 100px; height: 42px; border: 2px dashed #fff; border-radius: 6px; background: rgba(255,255,255,0.3);
-            display: flex; justify-content: center; align-items: center; transition: all 0.3s;
+            width: 120px; height: 42px; border: 2px dashed #fff; border-radius: 6px; background: rgba(255,255,255,0.3);
+            display: flex; justify-content: center; align-items: center; transition: all 0.3s; font-size: 10px; color: #fff; font-weight: bold;
         }
-        .drop-target.hover { background: rgba(255,255,255,0.8); transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.9); }
+        .drop-target.hover { background: rgba(255,255,255,0.8); transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.9); color: var(--primary); }
         
-        .placed-pump {
+        .placed-tool {
             width: 100%; height: 100%; background: var(--primary); color: white; border-radius: 6px;
             display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 9px; text-align: center; font-weight: bold;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
@@ -87,13 +98,13 @@
             height: 90px; background: white; border-top: 2px solid #ddd; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 30; gap: 15px;
         }
         .briefing-box {
-            font-size: 11px; background: #ecf0f1; padding: 8px 12px; border-left: 4px solid var(--secondary); border-radius: 4px; max-width: 320px; line-height: 1.3;
+            font-size: 11px; background: #ecf0f1; padding: 8px 12px; border-left: 4px solid var(--secondary); border-radius: 4px; max-width: 350px; line-height: 1.3;
         }
         .inventory-horizontal {
             display: flex; gap: 10px; align-items: center; flex: 1; justify-content: flex-end;
         }
         .draggable-item {
-            background: var(--primary); color: white; padding: 10px 15px; text-align: center; border-radius: 6px;
+            background: var(--primary); color: white; padding: 8px 12px; text-align: center; border-radius: 6px;
             cursor: grab; user-select: none; font-size: 11px; font-weight: bold; touch-action: none; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .draggable-item:active { cursor: grabbing; }
@@ -105,12 +116,13 @@
             transition: all 1s ease-in-out; z-index: 10;
         }
 
-        /* --- MODAL DE CONFIGURAÇÃO --- */
-        #config-modal {
-            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; padding: 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 50; width: 90%; max-width: 320px;
+        /* --- MODAL DE CONFIGURAÇÃO NÃO-OBSTRUTIVO (Lateral Direito) --- */
+        #config-side-panel {
+            display: none; position: absolute; top: 60px; right: 20px; width: 280px;
+            background: white; padding: 20px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 50;
+            border-left: 4px solid var(--secondary);
         }
-        #config-modal h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        #config-side-panel h3 { margin-top: 0; font-size: 15px; border-bottom: 1px solid #ccc; padding-bottom: 8px; color: var(--primary); }
         
         /* --- FEEDBACK OVERLAY --- */
         #feedback-overlay {
@@ -136,8 +148,9 @@
         @media (max-width: 768px) {
             #bottom-toolbar { height: auto; padding: 10px; flex-direction: column; align-items: stretch; gap: 8px; }
             .briefing-box { max-width: 100%; font-size: 10px; padding: 6px; }
-            .inventory-horizontal { justify-content: center; }
-            .draggable-item { height: 40px; padding: 5px 10px; font-size: 10px; }
+            .inventory-horizontal { justify-content: center; flex-wrap: wrap; }
+            .draggable-item { height: 40px; padding: 5px 8px; font-size: 10px; flex: 1; min-width: 90px; }
+            #config-side-panel { width: 90%; right: 5%; top: 60px; }
         }
     </style>
 </head>
@@ -160,7 +173,17 @@
                 <label for="nascimento">Data de Nascimento</label>
                 <input type="date" id="nascimento" required>
             </div>
-            <button class="btn btn-primary" onclick="iniciarSessao()">Acessar Simulação</button>
+            <button class="btn btn-primary" onclick="processarLogin()">Acessar Simulação</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE BRIEFING INICIAL (HISTORINHA) -->
+    <div id="intro-modal">
+        <div class="intro-card">
+            <h3>Tema 1: Firewall da Membrana</h3>
+            <p><strong>Cenário de Alerta:</strong> A célula foi exposta a um ambiente altamente hipotônico (baixa concentração externa de solutos). A água começou a inundar o meio intracelular por osmose, gerando alta pressão interna e iminente risco de ruptura (lise celular).</p>
+            <p><strong>Missão:</strong> Analise as ferramentas disponíveis na barra inferior. Escolha sabiamente aquela que consegue realizar trabalho biológico ativo para regular os solutos na membrana. Evite ferramentas passivas ou de transporte em massa inadequadas!</p>
+            <button class="btn btn-primary" style="margin-top:20px;" onclick="fecharIntroModal()">Entendido, Iniciar Missão</button>
         </div>
     </div>
 
@@ -168,7 +191,7 @@
     <div id="workspace">
         <!-- Topo: Barra de Controles e Status Sutil -->
         <div id="top-bar">
-            <button id="btn-simular" onclick="executarSimulacao()">Executar Simulação</button>
+            <button id="btn-simular" onclick="executarSimulacao()">Simular</button>
             <div style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
                 <div class="badge-info">Tema 1: Firewall da Membrana</div>
                 <div id="timer-display" class="badge-info timer-badge">00:00</div>
@@ -181,46 +204,52 @@
             
             <div id="membrane-zone">
                 <div id="slot" class="drop-target" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <span>Arraste aqui</span>
+                    <span>Arraste ferramenta aqui</span>
                 </div>
             </div>
             
             <div id="intracellular">Meio Intracelular (Alta Pressão Osmótica - Perigo de Lise)</div>
         </div>
 
-        <!-- Rodapé Fixo: Painel Horizontal de Ferramentas -->
+        <!-- Painel Lateral Não-Obstrutivo de Configuração (Direita) -->
+        <div id="config-side-panel">
+            <h3>Configurar Ferramenta</h3>
+            <div class="form-group">
+                <label>Consome ATP?</label>
+                <select id="cfg-atp" style="width:100%; padding:8px;">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim (Transporte Ativo)</option>
+                    <option value="nao">Não (Difusão Simples)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Direção do Transporte</label>
+                <select id="cfg-dir" style="width:100%; padding:8px;">
+                    <option value="">Selecione...</option>
+                    <option value="favor">A favor do gradiente (Para dentro)</option>
+                    <option value="contra">Contra o gradiente (Para fora)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="salvarConfig()">Aplicar Configuração</button>
+        </div>
+
+        <!-- Rodapé Fixo: Painel Horizontal de Ferramentas (Com as 3 Opções) -->
         <div id="bottom-toolbar">
             <div class="briefing-box">
-                <strong>Briefing:</strong> Choque hipotônico em curso. Arraste a <strong>Bomba de Íons</strong> para o canal da membrana, configure o transporte ativo e salve a célula.
+                <strong>Briefing:</strong> Choque hipotônico detectado. Selecione e arraste o mecanismo correto para a membrana.
             </div>
             <div class="inventory-horizontal">
-                <div class="draggable-item" draggable="true" id="bomba-ions" ondragstart="drag(event)">
+                <div class="draggable-item" draggable="true" id="ferramenta-bomba" ondragstart="drag(event)" data-type="bomba">
                     ⚡ Bomba de Íons
+                </div>
+                <div class="draggable-item" draggable="true" id="ferramenta-canal" ondragstart="drag(event)" data-type="canal">
+                    🚪 Canal de Proteína
+                </div>
+                <div class="draggable-item" draggable="true" id="ferramenta-vesicula" ondragstart="drag(event)" data-type="vesicula">
+                    📦 Vesícula de Exocitose
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- MODAL DE CONFIGURAÇÃO -->
-    <div id="config-modal">
-        <h3>Configurar Proteína de Membrana</h3>
-        <div class="form-group">
-            <label>Consome ATP?</label>
-            <select id="cfg-atp" style="width:100%; padding:8px;">
-                <option value="">Selecione...</option>
-                <option value="sim">Sim (Transporte Ativo)</option>
-                <option value="nao">Não (Difusão Simples)</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Direção do Transporte</label>
-            <select id="cfg-dir" style="width:100%; padding:8px;">
-                <option value="">Selecione...</option>
-                <option value="favor">A favor do gradiente (Para dentro)</option>
-                <option value="contra">Contra o gradiente (Para fora)</option>
-            </select>
-        </div>
-        <button class="btn btn-primary" onclick="salvarConfig()">Aplicar Configuração</button>
     </div>
 
     <!-- FEEDBACK OVERLAY -->
@@ -234,30 +263,33 @@
     </div>
 
     <script>
-        // ESTADO GLOBAL DA APLICAÇÃO (Motor PFS)
+        // ESTADO GLOBAL DA APLICAÇÃO (Motor PFS Ponderado)
         let sessionData = {
             aluno: {},
             log: {
-                entrada: 'Tema 1 - Firewall da Membrana (Choque Hipotônico - Full View)',
+                entrada: 'Tema 1 - Firewall da Membrana (Choque Hipotônico)',
+                tentativas_equipamentos: [],
                 falhas: [],
                 saida: null,
                 tempo_conclusao_segundos: null,
+                pontuacao_final: 0,
                 rank: null
             },
             status_sincronizacao: 'pendente'
         };
 
-        let isPumpPlaced = false;
+        let activeEquipment = null; // 'bomba', 'canal', 'vesicula'
         let pumpConfig = { atp: null, dir: null };
         let failCount = 0;
+        let incorrectEquipmentsTried = 0; // Penalidade por erro conceitual
         let ions = [];
         
         // Timer
         let startTime = null;
         let timerInterval = null;
 
-        // --- SISTEMA DE LOGIN ---
-        function iniciarSessao() {
+        // --- SISTEMA DE LOGIN E BRIEFING ---
+        function processarLogin() {
             const nome = document.getElementById('nome').value.trim();
             const matricula = document.getElementById('matricula').value.trim();
             const nascimento = document.getElementById('nascimento').value.trim();
@@ -269,6 +301,11 @@
 
             sessionData.aluno = { nome, matricula, nascimento };
             document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('intro-modal').style.display = 'flex';
+        }
+
+        function fecharIntroModal() {
+            document.getElementById('intro-modal').style.display = 'none';
             document.getElementById('workspace').style.display = 'flex';
             
             // Inicia Timer e Display
@@ -288,12 +325,16 @@
 
         // --- MECÂNICA DE ARRASTAR E SOLTAR (DESKTOP) ---
         function allowDrop(ev) { ev.preventDefault(); ev.target.classList.add('hover'); }
-        function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+        function drag(ev) { 
+            ev.dataTransfer.setData("text", ev.target.id);
+            ev.dataTransfer.setData("type", ev.target.getAttribute('data-type'));
+        }
         function drop(ev) {
             ev.preventDefault();
             const slot = document.getElementById('slot');
             slot.classList.remove('hover');
-            instalarBomba();
+            const eqType = ev.dataTransfer.getData("type") || window._currentDraggedType;
+            processarInstalacaoEquipamento(eqType);
         }
 
         document.getElementById('slot').addEventListener('dragleave', function(e) {
@@ -301,89 +342,118 @@
         });
 
         // --- SUPORTE HÍBRIDO A EVENTOS DE TOQUE COM TOLERÂNCIA MAGNÉTICA (MOBILE) ---
+        let currentDraggedType = null;
+
         function configurarSuporteTouch() {
-            const bomba = document.getElementById('bomba-ions');
+            const itens = document.querySelectorAll('.draggable-item');
             const slot = document.getElementById('slot');
 
-            bomba.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const rect = bomba.getBoundingClientRect();
-                
-                bomba.dataset.offsetX = touch.clientX - rect.left;
-                bomba.dataset.offsetY = touch.clientY - rect.top;
+            itens.forEach(item => {
+                const type = item.getAttribute('data-type');
 
-                bomba.style.position = 'fixed';
-                bomba.style.zIndex = '1000';
-                bomba.style.width = rect.width + 'px';
-                bomba.style.margin = '0';
-                
-                bomba.style.left = (touch.clientX - bomba.dataset.offsetX) + 'px';
-                bomba.style.top = (touch.clientY - bomba.dataset.offsetY) + 'px';
-            }, { passive: false });
+                item.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    currentDraggedType = type;
+                    window._currentDraggedType = type;
+                    
+                    const touch = e.touches[0];
+                    const rect = item.getBoundingClientRect();
+                    
+                    item.dataset.offsetX = touch.clientX - rect.left;
+                    item.dataset.offsetY = touch.clientY - rect.top;
 
-            bomba.addEventListener('touchmove', function(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                bomba.style.left = (touch.clientX - bomba.dataset.offsetX) + 'px';
-                bomba.style.top = (touch.clientY - bomba.dataset.offsetY) + 'px';
+                    item.style.position = 'fixed';
+                    item.style.zIndex = '1000';
+                    item.style.width = rect.width + 'px';
+                    item.style.margin = '0';
+                    
+                    item.style.left = (touch.clientX - item.dataset.offsetX) + 'px';
+                    item.style.top = (touch.clientY - item.dataset.offsetY) + 'px';
+                }, { passive: false });
 
-                const slotRect = slot.getBoundingClientRect();
-                
-                // Zona de Atração Magnética (Tolerância de 50px)
-                const tolerance = 50;
-                const isWithinX = touch.clientX >= (slotRect.left - tolerance) && touch.clientX <= (slotRect.right + tolerance);
-                const isWithinY = touch.clientY >= (slotRect.top - tolerance) && touch.clientY <= (slotRect.bottom + tolerance);
+                item.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    item.style.left = (touch.clientX - item.dataset.offsetX) + 'px';
+                    item.style.top = (touch.clientY - item.dataset.offsetY) + 'px';
 
-                if (isWithinX && isWithinY) {
-                    slot.classList.add('hover');
-                } else {
+                    const slotRect = slot.getBoundingClientRect();
+                    const tolerance = 50; // Zona de atração magnética de 50px
+                    const isWithinX = touch.clientX >= (slotRect.left - tolerance) && touch.clientX <= (slotRect.right + tolerance);
+                    const isWithinY = touch.clientY >= (slotRect.top - tolerance) && touch.clientY <= (slotRect.bottom + tolerance);
+
+                    if (isWithinX && isWithinY) {
+                        slot.classList.add('hover');
+                    } else {
+                        slot.classList.remove('hover');
+                    }
+                }, { passive: false });
+
+                item.addEventListener('touchend', function(e) {
+                    const touch = e.changedTouches[0];
+                    const slotRect = slot.getBoundingClientRect();
                     slot.classList.remove('hover');
-                }
-            }, { passive: false });
 
-            bomba.addEventListener('touchend', function(e) {
-                const touch = e.changedTouches[0];
-                const slotRect = slot.getBoundingClientRect();
-                slot.classList.remove('hover');
+                    const tolerance = 50;
+                    const isWithinX = touch.clientX >= (slotRect.left - tolerance) && touch.clientX <= (slotRect.right + tolerance);
+                    const isWithinY = touch.clientY >= (slotRect.top - tolerance) && touch.clientY <= (slotRect.bottom + tolerance);
 
-                const tolerance = 50;
-                const isWithinX = touch.clientX >= (slotRect.left - tolerance) && touch.clientX <= (slotRect.right + tolerance);
-                const isWithinY = touch.clientY >= (slotRect.top - tolerance) && touch.clientY <= (slotRect.bottom + tolerance);
-
-                if (isWithinX && isWithinY) {
-                    instalarBomba();
-                } else {
-                    bomba.style.position = 'static';
-                    bomba.style.zIndex = 'auto';
-                    bomba.style.width = 'auto';
-                    bomba.style.margin = '0';
-                }
+                    if (isWithinX && isWithinY) {
+                        processarInstalacaoEquipamento(currentDraggedType);
+                        item.style.display = 'none';
+                    } else {
+                        item.style.position = 'static';
+                        item.style.zIndex = 'auto';
+                        item.style.width = 'auto';
+                        item.style.margin = '0';
+                    }
+                });
             });
         }
 
-        // --- INSTALAÇÃO DA BOMBA ---
-        function instalarBomba() {
-            if (!isPumpPlaced) {
-                isPumpPlaced = true;
-                const draggable = document.getElementById('bomba-ions');
-                draggable.style.display = 'none';
-                
-                const slot = document.getElementById('slot');
-                slot.innerHTML = '<div class="placed-pump" onclick="abrirConfig()">Bomba Instalada<br>(Toque p/ Configurar)</div>';
-                slot.style.border = "none";
-                slot.style.background = "transparent";
-                
-                // Exibe botão de simulação discretamente no topo esquerdo conforme especificado
+        // --- INSTALAÇÃO E VALIDAÇÃO DE EQUIPAMENTOS ---
+        function processarInstalacaoEquipamento(tipo) {
+            activeEquipment = tipo;
+            sessionData.log.tentativas_equipamentos.push(tipo);
+
+            document.querySelectorAll('.draggable-item').forEach(el => {
+                if(el.getAttribute('data-type') === tipo) {
+                    el.style.display = 'none';
+                }
+            });
+
+            const slot = document.getElementById('slot');
+            slot.style.border = "none";
+            slot.style.background = "transparent";
+
+            if (tipo === 'bomba') {
+                slot.innerHTML = '<div class="placed-tool" onclick="abrirConfig()">⚡ Bomba de Íons<br>(Toque p/ Configurar)</div>';
                 document.getElementById('btn-simular').style.display = 'block';
-                
-                abrirConfig(); 
+                abrirConfig();
+            } else if (tipo === 'canal') {
+                slot.innerHTML = '<div class="placed-tool" style="background:#e74c3c;" onclick="testarEquipamentoErrado(\'canal\')">🚪 Canal de Proteína<br>(Inadequado)</div>';
+                document.getElementById('btn-simular').style.display = 'block';
+                incorrectEquipmentsTried++;
+                sessionData.log.falhas.push({ tipo: 'equipamento_incorreto', eq: 'Canal de Proteína', motivo: 'Canal de difusão facilitada não consome ATP nem consegue bombear solutos contra o gradiente em meio hipotônico.' });
+                alert("Atenção: Canais de difusão facilitada operam a favor do gradiente e não realizam o trabalho ativo necessário para reverter o choque hipotônico!");
+            } else if (tipo === 'vesicula') {
+                slot.innerHTML = '<div class="placed-tool" style="background:#e74c3c;" onclick="testarEquipamentoErrado(\'vesicula\')">📦 Vesícula de Exocitose<br>(Inadequado)</div>';
+                document.getElementById('btn-simular').style.display = 'block';
+                incorrectEquipmentsTried++;
+                sessionData.log.falhas.push({ tipo: 'equipamento_incorreto', eq: 'Vesícula de Exocitose', motivo: 'Vesícula consome ATP mas atua em transporte em massa de macromoléculas, não regulando o balanço osmótico iônico.' });
+                alert("Atenção: Vesículas realizam transporte em massa por fusão de membranas, não sendo a proteína transmembrana de ajuste iônico correta!");
             }
         }
 
-        // --- CONFIGURAÇÃO DA BOMBA ---
+        function testarEquipamentoErrado(eq) {
+            failCount++;
+            document.getElementById('intracellular').classList.add('lysis-animation');
+            mostrarFeedback(false, 'Falha Estrutural', `Você instalou uma estrutura incorreta (${eq === 'canal' ? 'Canal de Proteína' : 'Vesícula de Exocitose'}). O raciocínio conceitual falhou e a célula colapsou.`);
+        }
+
+        // --- CONFIGURAÇÃO DA BOMBA (Lateral Não-Obstrutivo) ---
         function abrirConfig() {
-            document.getElementById('config-modal').style.display = 'block';
+            document.getElementById('config-side-panel').style.display = 'block';
             if (pumpConfig.atp) document.getElementById('cfg-atp').value = pumpConfig.atp;
             if (pumpConfig.dir) document.getElementById('cfg-dir').value = pumpConfig.dir;
         }
@@ -399,9 +469,9 @@
             
             pumpConfig.atp = atp;
             pumpConfig.dir = dir;
-            document.getElementById('config-modal').style.display = 'none';
-            document.querySelector('.placed-pump').innerHTML = '⚡ Bomba Ativa<br>(Configurada)';
-            document.querySelector('.placed-pump').style.background = '#27ae60';
+            document.getElementById('config-side-panel').style.display = 'none';
+            document.querySelector('.placed-tool').innerHTML = '⚡ Bomba Ativa<br>(Configurada)';
+            document.querySelector('.placed-tool').style.background = '#27ae60';
         }
 
         // --- GERADOR DE ÍONS VISUAIS ---
@@ -429,15 +499,20 @@
             }, 50);
         }
 
-        // --- MOTOR LÓGICO (Processo, Falha, Solução e Gamificação) ---
+        // --- MOTOR LÓGICO PONDERADO (90% Raciocínio + 10% Agilidade + Penalidades) ---
         function executarSimulacao() {
-            if (!isPumpPlaced) {
+            if (!activeEquipment) {
                 alert("Nenhuma estrutura instalada na membrana!");
+                return;
+            }
+
+            if (activeEquipment !== 'bomba') {
+                testarEquipamentoErrado(activeEquipment);
                 return;
             }
             
             if (!pumpConfig.atp || !pumpConfig.dir) {
-                alert("Configure os parâmetros da bomba clicando sobre ela.");
+                alert("Configure os parâmetros da bomba no painel lateral.");
                 return;
             }
 
@@ -450,36 +525,52 @@
                 if (atpAtivo && contraGradiente) {
                     clearInterval(timerInterval);
                     const tempoGasto = Math.floor((Date.now() - startTime) / 1000);
-                    let rankText, rankIcon;
                     
-                    if (tempoGasto <= 45) {
-                        rankText = "Master";
+                    // --- SISTEMA DE PONTUAÇÃO PONDERADA ---
+                    // 90% Raciocínio Técnico (90 pts base - penalidades por erros de equipamento ou configuração)
+                    let pontosRaciocinio = 90 - (incorrectEquipmentsTried * 15);
+                    if (pontosRaciocinio < 0) pontosRaciocinio = 0;
+
+                    // 10% Agilidade / Tempo (max 10 pts)
+                    let pontosTempo = 1;
+                    if (tempoGasto <= 30) pontosTempo = 10;
+                    else if (tempoGasto <= 60) pontosTempo = 7;
+                    else if (tempoGasto <= 120) pontosTempo = 4;
+
+                    let pontuacaoFinal = pontosRaciocinio + pontosTempo;
+                    if (pontuacaoFinal > 100) pontuacaoFinal = 100;
+
+                    // Ranks Ponderados
+                    let rankText, rankIcon;
+                    if (pontuacaoFinal >= 90) {
+                        rankText = "Master Científico (Especialista)";
                         rankIcon = "🏆";
-                    } else if (tempoGasto <= 90) {
-                        rankText = "Intermediário";
+                    } else if (pontuacaoFinal >= 70) {
+                        rankText = "Intermediário (Analítico)";
                         rankIcon = "⭐";
                     } else {
-                        rankText = "Iniciante";
+                        rankText = "Iniciante (Em Desenvolvimento)";
                         rankIcon = "🌱";
                     }
 
                     sessionData.log.tempo_conclusao_segundos = tempoGasto;
+                    sessionData.log.pontuacao_final = pontuacaoFinal;
                     sessionData.log.rank = rankText;
-                    sessionData.log.saida = 'Sucesso: Homeostase atingida. Transporte ativo configurado corretamente.';
+                    sessionData.log.saida = `Sucesso: Homeostase atingida. Pontuação Ponderada: ${pontosRaciocinio}pts (Raciocínio) + ${pontosTempo}pts (Agilidade) = ${pontuacaoFinal}/100.`;
                     
                     mostrarFeedback(true, 'Homeostase Atingida!', 
-                        `Excelente! Você configurou a bomba usando ATP para bombear solutos contra o gradiente, evitando o choque hipotônico.`, 
-                        { rank: rankText, icone: rankIcon, tempo: tempoGasto }
+                        `Parabéns! Raciocínio clínico perfeito: Seleção correta do transporte ativo contra o gradiente iônico, evitando o choque hipotônico.`, 
+                        { rank: rankText, icone: rankIcon, tempo: tempoGasto, pontuados: pontuacaoFinal, raciocinio: pontosRaciocinio, agilidade: pontosTempo }
                     );
                     salvarPersistencia();
                 } else {
                     failCount++;
-                    let motivo = !atpAtivo ? "Tentou usar difusão, o que não gera energia para bombear solutos contra o gradiente." : "Bombeou os íons a favor do gradiente, agravando a pressão osmótica.";
+                    let motivo = !atpAtivo ? "Configurou sem gasto de ATP (difusão), o que não gera energia para bombear solutos contra o gradiente." : "Configurou o transporte a favor do gradiente, agravando a pressão osmótica interna.";
                     sessionData.log.falhas.push({ tentativa: failCount, config: {...pumpConfig}, motivo: motivo, tempo_relativo: Math.floor((Date.now() - startTime)/1000) });
                     
                     document.getElementById('intracellular').classList.add('lysis-animation');
                     
-                    mostrarFeedback(false, 'Falha: Lise Celular', 'A célula colapsou por entrada excessiva de água (osmose).<br><br>Diagnóstico: ' + motivo);
+                    mostrarFeedback(false, 'Falha de Configuração', 'A configuração da Bomba de Íons está incorreta e a célula sofreu lise por choque hipotônico.<br><br>Diagnóstico: ' + motivo);
                 }
             }, 1500);
         }
@@ -505,7 +596,14 @@
             
             if (isSuccess && ranking) {
                 rankContainer.style.display = 'block';
-                rankContainer.innerHTML = `<div class="rank-badge">Rank: ${ranking.rank} ${ranking.icone} <br><span style="font-size:12px; font-weight:normal;">Tempo: ${ranking.tempo} segundos</span></div>`;
+                rankContainer.innerHTML = `
+                    <div class="rank-badge">${ranking.rank} ${ranking.icone}</div>
+                    <div style="font-size:12px; color:#555; margin-top:5px; line-height: 1.4;">
+                        <strong>Nota Final Ponderada:</strong> ${ranking.pontuados} / 100 pts<br>
+                        🔹 Raciocínio Técnico (90%): ${ranking.raciocinio} pts<br>
+                        ⚡ Agilidade (10%): ${ranking.agilidade} pts (${ranking.tempo}s)
+                    </div>
+                `;
             } else {
                 rankContainer.style.display = 'none';
             }
@@ -522,9 +620,25 @@
 
         function resetarTentativa() {
             document.getElementById('feedback-overlay').style.display = 'none';
+            document.getElementById('config-side-panel').style.display = 'none';
             document.getElementById('intracellular').classList.remove('lysis-animation');
             const intra = document.getElementById('intracellular');
             intra.innerHTML = 'Meio Intracelular (Alta Pressão Osmótica - Perigo de Lise)';
+            
+            // Restaura inventário
+            document.querySelectorAll('.draggable-item').forEach(el => {
+                el.style.display = 'flex';
+                el.style.position = 'static';
+                el.style.width = 'auto';
+            });
+            const slot = document.getElementById('slot');
+            slot.innerHTML = '<span>Arraste ferramenta aqui</span>';
+            slot.style.border = "2px dashed #fff";
+            slot.style.background = "rgba(255,255,255,0.3)";
+            document.getElementById('btn-simular').style.display = 'none';
+            activeEquipment = null;
+            pumpConfig = { atp: null, dir: null };
+
             inicializarCenario();
         }
 
@@ -542,5 +656,3 @@
     </script>
 </body>
 </html>
-
-```
