@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Mestre: Tema 1 - Firewall da Membrana</title>
+    <!-- BioEngine SIM-DOC-BIO | Engenharia de Software Educacional -->
+    <!-- Ref: MATRIZ_20_SIMULACOES.xlsx -->
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --primary: #2c3e50;
+            --secondary: #18bc9c;
+            --danger: #e74c3c;
+            --cell-in: #dff9fb;
+            --cell-out: #c7ecee;
+            --membrane: #f39c12;
+        }
+        
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--primary); height: 100vh; overflow: hidden; }
+
+        /* --- TELA DE LOGIN --- */
+        #login-screen {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 100;
+        }
+        .login-card {
+            background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 100%; max-width: 400px;
+        }
+        .login-card h2 { margin-top: 0; text-align: center; color: var(--primary); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; text-transform: uppercase; transition: background 0.3s; }
+        .btn-primary { background: var(--secondary); color: white; }
+        .btn-primary:hover { background: #128f76; }
+
+        /* --- WORKSPACE --- */
+        #workspace { display: none; width: 100vw; height: 100vh; flex-direction: row; }
+        
+        /* Lateral */
+        #sidebar { width: 300px; background: white; border-right: 2px solid #ddd; padding: 20px; display: flex; flex-direction: column; }
+        .briefing { background: #ecf0f1; padding: 15px; border-left: 4px solid var(--secondary); border-radius: 4px; margin-bottom: 20px; font-size: 14px; }
+        .inventory { flex: 1; border: 2px dashed #ccc; border-radius: 8px; padding: 10px; background: #fafafa; }
+        .inventory h3 { font-size: 14px; margin-top: 0; text-align: center; }
+        
+        .draggable-item {
+            background: var(--primary); color: white; padding: 10px; text-align: center; border-radius: 4px;
+            cursor: grab; margin-bottom: 10px; user-select: none; font-size: 12px; font-weight: bold;
+        }
+        .draggable-item:active { cursor: grabbing; }
+
+        #btn-simular { background: var(--primary); color: white; margin-top: 20px; }
+
+        /* Área Principal */
+        #main-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        #extracellular { flex: 1; background: var(--cell-out); display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; font-weight: bold; color: #555; position: relative;}
+        #intracellular { flex: 1; background: var(--cell-in); display: flex; justify-content: center; align-items: flex-start; padding-top: 20px; font-weight: bold; color: #555; position: relative; overflow: hidden;}
+        
+        /* Membrana */
+        #membrane-zone {
+            height: 40px; background: repeating-linear-gradient( 45deg, var(--membrane), var(--membrane) 10px, #e67e22 10px, #e67e22 20px );
+            display: flex; justify-content: center; align-items: center; position: relative; z-index: 10;
+        }
+        
+        .drop-target {
+            width: 80px; height: 60px; border: 2px dashed #fff; border-radius: 8px; background: rgba(255,255,255,0.3);
+            display: flex; justify-content: center; align-items: center; transition: all 0.3s;
+        }
+        .drop-target.hover { background: rgba(255,255,255,0.7); transform: scale(1.05); }
+        
+        .placed-pump {
+            width: 100%; height: 100%; background: var(--primary); color: white; border-radius: 8px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 10px; text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Partículas de Sódio */
+        .na-ion {
+            position: absolute; width: 15px; height: 15px; background: var(--danger); color: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 8px; font-weight: bold;
+            transition: all 1s ease-in-out; z-index: 5;
+        }
+
+        /* --- MODAL DE CONFIGURAÇÃO --- */
+        #config-modal {
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 20px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 50; width: 300px;
+        }
+        #config-modal h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        
+        /* --- FEEDBACK OVERLAY --- */
+        #feedback-overlay {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 200; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .feedback-box { background: white; padding: 30px; border-radius: 8px; text-align: center; max-width: 400px; }
+        .feedback-box.fail h2 { color: var(--danger); }
+        .feedback-box.success h2 { color: var(--secondary); }
+
+        /* Animação de Lise */
+        .lysis-animation { animation: shake 0.5s infinite, expand 2s forwards; }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+        @keyframes expand { to { background-color: #ffb8b8; } }
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h2>BioEngine SIM-DOC-BIO</h2>
+            <p style="text-align:center; font-size:12px; color:#7f8c8d;">Autenticação Necessária</p>
+            <div class="form-group">
+                <label for="nome">Nome Completo</label>
+                <input type="text" id="nome" required placeholder="Ex: Tarcísio Ferreira...">
+            </div>
+            <div class="form-group">
+                <label for="matricula">Matrícula</label>
+                <input type="text" id="matricula" required placeholder="Número de registro">
+            </div>
+            <div class="form-group">
+                <label for="nascimento">Data de Nascimento</label>
+                <input type="date" id="nascimento" required>
+            </div>
+            <button class="btn btn-primary" onclick="iniciarSessao()">Acessar Simulação</button>
+        </div>
+    </div>
+
+    <!-- WORKSPACE -->
+    <div id="workspace">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <div class="briefing">
+                <strong>Briefing Operacional:</strong><br><br>
+                Estabilize o meio intracelular. Impeça a lise celular por excesso de íons Na+.<br><br>
+                <em>Referência: MATRIZ_20_SIMULACOES.xlsx (Tema 1)</em>
+            </div>
+            
+            <div class="inventory">
+                <h3>Equipamentos</h3>
+                <div class="draggable-item" draggable="true" id="bomba-ions" ondragstart="drag(event)">
+                    Bomba de Íons
+                </div>
+            </div>
+
+            <button id="btn-simular" class="btn" onclick="executarSimulacao()">Simular</button>
+        </div>
+
+        <!-- Área Principal -->
+        <div id="main-area">
+            <div id="extracellular">Meio Extracelular (Alta Concentração Na+)</div>
+            
+            <div id="membrane-zone">
+                <div id="slot" class="drop-target" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <!-- Slot vazio -->
+                </div>
+            </div>
+            
+            <div id="intracellular">Meio Intracelular (Perigo de Acúmulo)</div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIGURAÇÃO -->
+    <div id="config-modal">
+        <h3>Configurar Proteína</h3>
+        <div class="form-group">
+            <label>Consome ATP?</label>
+            <select id="cfg-atp" style="width:100%; padding:8px;">
+                <option value="">Selecione...</option>
+                <option value="sim">Sim (Transporte Ativo)</option>
+                <option value="nao">Não (Difusão Simples)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Direção do Transporte</label>
+            <select id="cfg-dir" style="width:100%; padding:8px;">
+                <option value="">Selecione...</option>
+                <option value="favor">A favor do gradiente (Para dentro)</option>
+                <option value="contra">Contra o gradiente (Para fora)</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="salvarConfig()">Aplicar Configuração</button>
+    </div>
+
+    <!-- FEEDBACK OVERLAY -->
+    <div id="feedback-overlay">
+        <div id="feedback-content" class="feedback-box">
+            <h2 id="feedback-title">Resultado</h2>
+            <p id="feedback-msg">Mensagem...</p>
+            <button class="btn btn-primary" id="btn-feedback" onclick="fecharFeedback()">Continuar</button>
+        </div>
+    </div>
+
+    <script>
+        // ESTADO GLOBAL DA APLICAÇÃO (Motor PFS)
+        let sessionData = {
+            aluno: {},
+            log: {
+                entrada: 'Tema 1 - Firewall da Membrana',
+                falhas: [],
+                saida: null
+            },
+            status_sincronizacao: 'pendente'
+        };
+
+        let isPumpPlaced = false;
+        let pumpConfig = { atp: null, dir: null };
+        let failCount = 0;
+        let ions = [];
+
+        // --- SISTEMA DE LOGIN ---
+        function iniciarSessao() {
+            const nome = document.getElementById('nome').value.trim();
+            const matricula = document.getElementById('matricula').value.trim();
+            const nascimento = document.getElementById('nascimento').value.trim();
+
+            if (!nome || !matricula || !nascimento) {
+                alert("Erro: Preencha todos os campos de identificação para liberar a área de trabalho.");
+                return;
+            }
+
+            sessionData.aluno = { nome, matricula, nascimento };
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('workspace').style.display = 'flex';
+            
+            inicializarCenario();
+        }
+
+        // --- MECÂNICA DE ARRASTAR E SOLTAR (PACKET TRACER STYLE) ---
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.target.classList.add('hover');
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const slot = document.getElementById('slot');
+            slot.classList.remove('hover');
+            
+            if (!isPumpPlaced) {
+                isPumpPlaced = true;
+                const draggable = document.getElementById('bomba-ions');
+                draggable.style.display = 'none'; // Remove do inventário
+                
+                // Cria a bomba instalada
+                slot.innerHTML = '<div class="placed-pump" onclick="abrirConfig()">Bomba Instalada<br>(Clique para Configurar)</div>';
+                slot.style.border = "none";
+                slot.style.background = "transparent";
+            }
+        }
+
+        // Slot remover highlight on dragleave
+        document.getElementById('slot').addEventListener('dragleave', function(e) {
+            e.target.classList.remove('hover');
+        });
+
+        // --- CONFIGURAÇÃO DA BOMBA ---
+        function abrirConfig() {
+            document.getElementById('config-modal').style.display = 'block';
+            if (pumpConfig.atp) document.getElementById('cfg-atp').value = pumpConfig.atp;
+            if (pumpConfig.dir) document.getElementById('cfg-dir').value = pumpConfig.dir;
+        }
+
+        function salvarConfig() {
+            const atp = document.getElementById('cfg-atp').value;
+            const dir = document.getElementById('cfg-dir').value;
+            
+            if (!atp || !dir) {
+                alert("Configure todos os parâmetros.");
+                return;
+            }
+            
+            pumpConfig.atp = atp;
+            pumpConfig.dir = dir;
+            document.getElementById('config-modal').style.display = 'none';
+            document.querySelector('.placed-pump').innerHTML = 'Bomba Ativa<br>(Configurada)';
+            document.querySelector('.placed-pump').style.background = '#27ae60';
+        }
+
+        // --- GERADOR DE ÍONS VISUAIS ---
+        function inicializarCenario() {
+            const extra = document.getElementById('extracellular');
+            for(let i=0; i<15; i++) {
+                criarIon(extra, true);
+            }
+        }
+
+        function criarIon(container, isExtra) {
+            const ion = document.createElement('div');
+            ion.className = 'na-ion';
+            ion.innerText = 'Na+';
+            
+            const w = container.clientWidth - 20;
+            const h = container.clientHeight - 20;
+            const left = Math.random() * w;
+            const top = Math.random() * h;
+            
+            ion.style.left = left + 'px';
+            ion.style.top = top + 'px';
+            
+            container.appendChild(ion);
+            ions.push({ el: ion, isExtra: isExtra });
+        }
+
+        // --- MOTOR LÓGICO (Processo, Falha, Solução) ---
+        function executarSimulacao() {
+            if (!isPumpPlaced) {
+                alert("Nenhuma estrutura instalada na membrana! Instale a Bomba de Íons primeiro.");
+                return;
+            }
+            
+            if (!pumpConfig.atp || !pumpConfig.dir) {
+                alert("A Bomba está instalada, mas sem configuração. Clique nela para configurar.");
+                return;
+            }
+
+            // Lógica Central do Tema 1
+            const atpAtivo = pumpConfig.atp === 'sim';
+            const contraGradiente = pumpConfig.dir === 'contra';
+
+            // Simulação visual básica
+            animarIons(atpAtivo, contraGradiente);
+
+            setTimeout(() => {
+                if (atpAtivo && contraGradiente) {
+                    // SUCESSO: Homeostase
+                    sessionData.log.saida = 'Sucesso: Homeostase atingida. Transporte ativo configurado corretamente.';
+                    mostrarFeedback(true, 'Homeostase Atingida!', 'Excelente! Você configurou a bomba usando ATP para bombear o Na+ contra o gradiente de concentração, salvando a célula da lise.');
+                    salvarPersistencia();
+                } else {
+                    // FALHA: Acúmulo e Lise
+                    failCount++;
+                    let motivo = !atpAtivo ? "Tentou usar difusão simples/facilitada para íons em excesso no meio externo." : "Bambeou os íons a favor do gradiente, inundando a célula.";
+                    sessionData.log.falhas.push({ tentativa: failCount, config: {...pumpConfig}, motivo: motivo });
+                    
+                    document.getElementById('intracellular').classList.add('lysis-animation');
+                    
+                    mostrarFeedback(false, 'Falha: Lise Celular', 'A célula colapsou por acúmulo de Na+ e entrada excessiva de água (osmose).<br><br>Diagnóstico: ' + motivo);
+                }
+            }, 1500);
+        }
+
+        function animarIons(atpAtivo, contraGradiente) {
+            const intra = document.getElementById('intracellular');
+            
+            if (!atpAtivo || !contraGradiente) {
+                // Erro: Íons entram na célula
+                for(let i=0; i<10; i++) {
+                    criarIon(intra, false);
+                }
+            } else {
+                // Sucesso: Íons se movem para fora (visualmente estáticos no exterior ou pequenos ajustes)
+                const extra = document.getElementById('extracellular');
+                criarIon(extra, true);
+                criarIon(extra, true);
+            }
+        }
+
+        // --- SISTEMA DE FEEDBACK E PERSISTÊNCIA ---
+        function mostrarFeedback(isSuccess, title, msg) {
+            const overlay = document.getElementById('feedback-overlay');
+            const box = document.getElementById('feedback-content');
+            
+            overlay.style.display = 'flex';
+            box.className = 'feedback-box ' + (isSuccess ? 'success' : 'fail');
+            document.getElementById('feedback-title').innerText = title;
+            document.getElementById('feedback-msg').innerHTML = msg;
+            
+            const btn = document.getElementById('btn-feedback');
+            if (isSuccess) {
+                btn.innerText = "Finalizar e Salvar";
+                btn.onclick = () => window.location.reload(); // Encerra o lab
+            } else {
+                btn.innerText = "Reconfigurar";
+                btn.onclick = resetarTentativa;
+            }
+        }
+
+        function resetarTentativa() {
+            document.getElementById('feedback-overlay').style.display = 'none';
+            document.getElementById('intracellular').classList.remove('lysis-animation');
+            // Remove íons extras que entraram
+            const intra = document.getElementById('intracellular');
+            intra.innerHTML = 'Meio Intracelular (Perigo de Acúmulo)';
+        }
+
+        function salvarPersistencia() {
+            // Regra Offline-First: Salvar JSON silenciosamente no localStorage
+            const key = 'sim_doc_bio_sync_' + sessionData.aluno.matricula + '_' + Date.now();
+            const dataString = JSON.stringify(sessionData);
+            
+            try {
+                localStorage.setItem(key, dataString);
+                console.log("[SIM-DOC-BIO] Dados salvos localmente com sucesso. Status: Pendente para sincronização espelho.");
+            } catch (e) {
+                console.error("Erro ao salvar no localStorage: ", e);
+            }
+        }
+    </script>
+</body>
+</html>
