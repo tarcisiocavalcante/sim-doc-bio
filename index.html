@@ -1,4 +1,4 @@
-<!-- firewall da membrana. -->
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -38,62 +38,77 @@
         .btn-primary { background: var(--secondary); color: white; }
         .btn-primary:hover { background: #128f76; }
 
-        /* --- WORKSPACE --- */
-        #workspace { display: none; width: 100vw; height: 100vh; flex-direction: row; }
+        /* --- WORKSPACE LAYOUT FULL-VIEW --- */
+        #workspace { display: none; width: 100vw; height: 100vh; flex-direction: column; position: relative; }
         
-        /* Lateral */
-        #sidebar { width: 300px; background: white; border-right: 2px solid #ddd; padding: 20px; display: flex; flex-direction: column; z-index: 20; }
-        .briefing { background: #ecf0f1; padding: 15px; border-left: 4px solid var(--secondary); border-radius: 4px; margin-bottom: 20px; font-size: 14px; }
-        .inventory { flex: 1; border: 2px dashed #ccc; border-radius: 8px; padding: 10px; background: #fafafa; }
-        .inventory h3 { font-size: 14px; margin-top: 0; text-align: center; }
-        
-        .draggable-item {
-            background: var(--primary); color: white; padding: 10px; text-align: center; border-radius: 4px;
-            cursor: grab; margin-bottom: 10px; user-select: none; font-size: 12px; font-weight: bold;
-            touch-action: none;
+        /* Topo: Controles e Informações Sutis */
+        #top-bar {
+            height: 50px; background: white; border-bottom: 2px solid #ddd; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 30;
         }
-        .draggable-item:active { cursor: grabbing; }
+        .badge-info { font-size: 12px; background: #ecf0f1; padding: 6px 12px; border-radius: 4px; font-weight: bold; color: var(--primary); }
+        .timer-badge { background: #2c3e50; color: white; font-family: monospace; }
+        
+        #btn-simular {
+            display: none; background: var(--secondary); color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        #btn-simular:hover { background: #128f76; }
 
-        /* Área Principal */
-        #main-area { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 10; }
+        /* Centro: Viewport da Célula Totalmente Limpo */
+        #viewport-celular {
+            flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; width: 100vw;
+        }
+        #extracellular {
+            flex: 1; background: var(--cell-out); display: flex; justify-content: center; align-items: flex-end; padding-bottom: 15px; font-weight: bold; color: #555; position: relative; font-size: 13px; text-align: center;
+        }
+        #intracellular {
+            flex: 1; background: var(--cell-in); display: flex; justify-content: center; align-items: flex-start; padding-top: 15px; font-weight: bold; color: #555; position: relative; font-size: 13px; text-align: center; overflow: hidden;
+        }
         
-        /* Controles Superiores */
-        #top-controls { background: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 15; }
-        #top-controls h3 { margin: 0; font-size: 16px; color: var(--primary); }
-        #btn-simular { background: var(--primary); color: white; width: auto; padding: 10px 30px; margin: 0; }
-        
-        #extracellular { flex: 1; background: var(--cell-out); display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; font-weight: bold; color: #555; position: relative;}
-        #intracellular { flex: 1; background: var(--cell-in); display: flex; justify-content: center; align-items: flex-start; padding-top: 20px; font-weight: bold; color: #555; position: relative; overflow: hidden;}
-        
-        /* Membrana */
+        /* Membrana Central e Zona de Drop */
         #membrane-zone {
-            height: 40px; background: repeating-linear-gradient( 45deg, var(--membrane), var(--membrane) 10px, #e67e22 10px, #e67e22 20px );
-            display: flex; justify-content: center; align-items: center; position: relative; z-index: 10;
+            height: 50px; background: repeating-linear-gradient( 45deg, var(--membrane), var(--membrane) 10px, #e67e22 10px, #e67e22 20px );
+            display: flex; justify-content: center; align-items: center; position: relative; z-index: 20; width: 100%; box-shadow: 0 0 10px rgba(0,0,0,0.2);
         }
         
         .drop-target {
-            width: 80px; height: 60px; border: 2px dashed #fff; border-radius: 8px; background: rgba(255,255,255,0.3);
+            width: 100px; height: 42px; border: 2px dashed #fff; border-radius: 6px; background: rgba(255,255,255,0.3);
             display: flex; justify-content: center; align-items: center; transition: all 0.3s;
         }
-        .drop-target.hover { background: rgba(255,255,255,0.7); transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.8); }
+        .drop-target.hover { background: rgba(255,255,255,0.8); transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.9); }
         
         .placed-pump {
-            width: 100%; height: 100%; background: var(--primary); color: white; border-radius: 8px;
-            display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 10px; text-align: center;
+            width: 100%; height: 100%; background: var(--primary); color: white; border-radius: 6px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 9px; text-align: center; font-weight: bold;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
+        /* Rodapé Fixo: Painel Horizontal de Ferramentas */
+        #bottom-toolbar {
+            height: 90px; background: white; border-top: 2px solid #ddd; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 30; gap: 15px;
+        }
+        .briefing-box {
+            font-size: 11px; background: #ecf0f1; padding: 8px 12px; border-left: 4px solid var(--secondary); border-radius: 4px; max-width: 320px; line-height: 1.3;
+        }
+        .inventory-horizontal {
+            display: flex; gap: 10px; align-items: center; flex: 1; justify-content: flex-end;
+        }
+        .draggable-item {
+            background: var(--primary); color: white; padding: 10px 15px; text-align: center; border-radius: 6px;
+            cursor: grab; user-select: none; font-size: 11px; font-weight: bold; touch-action: none; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .draggable-item:active { cursor: grabbing; }
+
         /* Partículas de Sódio */
         .na-ion {
-            position: absolute; width: 15px; height: 15px; background: var(--danger); color: white; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; font-size: 8px; font-weight: bold;
-            transition: all 1s ease-in-out; z-index: 5;
+            position: absolute; width: 14px; height: 14px; background: var(--danger); color: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 7px; font-weight: bold;
+            transition: all 1s ease-in-out; z-index: 10;
         }
 
         /* --- MODAL DE CONFIGURAÇÃO --- */
         #config-modal {
             display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; padding: 20px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 50; width: 90%; max-width: 300px;
+            background: white; padding: 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 50; width: 90%; max-width: 320px;
         }
         #config-modal h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
         
@@ -117,15 +132,12 @@
         @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
         @keyframes expand { to { background-color: #ffb8b8; } }
 
-        /* RESPONSIVIDADE PARA SMARTPHONES */
+        /* RESPONSIVIDADE MOBILE OTIMIZADA */
         @media (max-width: 768px) {
-            #workspace { flex-direction: column; }
-            #top-controls { padding: 10px; }
-            #top-controls h3 { font-size: 14px; }
-            #btn-simular { padding: 8px 15px; font-size: 12px; }
-            #sidebar { width: 100%; border-right: none; border-bottom: 2px solid #ddd; padding: 10px; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: stretch; height: auto; max-height: 40vh; overflow-y: auto; }
-            .briefing { margin-bottom: 10px; width: 100%; font-size: 12px; padding: 10px; }
-            .inventory { width: 100%; min-height: 80px; padding: 5px; }
+            #bottom-toolbar { height: auto; padding: 10px; flex-direction: column; align-items: stretch; gap: 8px; }
+            .briefing-box { max-width: 100%; font-size: 10px; padding: 6px; }
+            .inventory-horizontal { justify-content: center; }
+            .draggable-item { height: 40px; padding: 5px 10px; font-size: 10px; }
         }
     </style>
 </head>
@@ -152,48 +164,46 @@
         </div>
     </div>
 
-    <!-- WORKSPACE -->
+    <!-- WORKSPACE FULL-VIEW -->
     <div id="workspace">
-        <!-- Lateral -->
-        <div id="sidebar">
-            <div class="briefing">
-                <strong>Briefing Operacional:</strong><br><br>
-                Após a exposição a um ambiente altamente hipotônico (baixa concentração externa, como água destilada), a água começou a inundar o meio intracelular por osmose.<br><br>
-                <strong>Missão:</strong> Estabilize o meio intracelular utilizando o equipamento adequado. Use a Bomba de Íons para bombear solutos para fora, regulando o volume interno e evitando a lise celular antes que a pressão osmótica destrua a membrana.<br><br>
-                <em>Referência: MATRIZ_20_SIMULACOES.xlsx</em>
-            </div>
-            
-            <div class="inventory">
-                <h3>Equipamentos</h3>
-                <div class="draggable-item" draggable="true" id="bomba-ions" ondragstart="drag(event)">
-                    Bomba de Íons
-                </div>
+        <!-- Topo: Barra de Controles e Status Sutil -->
+        <div id="top-bar">
+            <button id="btn-simular" onclick="executarSimulacao()">Executar Simulação</button>
+            <div style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+                <div class="badge-info">Tema 1: Firewall da Membrana</div>
+                <div id="timer-display" class="badge-info timer-badge">00:00</div>
             </div>
         </div>
 
-        <!-- Área Principal -->
-        <div id="main-area">
-            <!-- Controles Superiores -->
-            <div id="top-controls">
-                <h3>Modo de Solução de Problemas (Troubleshooting)</h3>
-                <button id="btn-simular" class="btn btn-primary" onclick="executarSimulacao()">Executar Simulação</button>
-            </div>
-
+        <!-- Viewport Central da Célula (Totalmente Visível) -->
+        <div id="viewport-celular">
             <div id="extracellular">Meio Extracelular (Ambiente Hipotônico - Baixa Concentração)</div>
             
             <div id="membrane-zone">
                 <div id="slot" class="drop-target" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <!-- Slot vazio -->
+                    <span>Arraste aqui</span>
                 </div>
             </div>
             
             <div id="intracellular">Meio Intracelular (Alta Pressão Osmótica - Perigo de Lise)</div>
         </div>
+
+        <!-- Rodapé Fixo: Painel Horizontal de Ferramentas -->
+        <div id="bottom-toolbar">
+            <div class="briefing-box">
+                <strong>Briefing:</strong> Choque hipotônico em curso. Arraste a <strong>Bomba de Íons</strong> para o canal da membrana, configure o transporte ativo e salve a célula.
+            </div>
+            <div class="inventory-horizontal">
+                <div class="draggable-item" draggable="true" id="bomba-ions" ondragstart="drag(event)">
+                    ⚡ Bomba de Íons
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL DE CONFIGURAÇÃO -->
     <div id="config-modal">
-        <h3>Configurar Proteína</h3>
+        <h3>Configurar Proteína de Membrana</h3>
         <div class="form-group">
             <label>Consome ATP?</label>
             <select id="cfg-atp" style="width:100%; padding:8px;">
@@ -228,7 +238,7 @@
         let sessionData = {
             aluno: {},
             log: {
-                entrada: 'Tema 1 - Firewall da Membrana (Choque Hipotônico)',
+                entrada: 'Tema 1 - Firewall da Membrana (Choque Hipotônico - Full View)',
                 falhas: [],
                 saida: null,
                 tempo_conclusao_segundos: null,
@@ -242,8 +252,9 @@
         let failCount = 0;
         let ions = [];
         
-        // Timer Invisível
+        // Timer
         let startTime = null;
+        let timerInterval = null;
 
         // --- SISTEMA DE LOGIN ---
         function iniciarSessao() {
@@ -260,11 +271,19 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('workspace').style.display = 'flex';
             
-            // Inicia o cronômetro silenciamente
+            // Inicia Timer e Display
             startTime = Date.now();
+            timerInterval = setInterval(atualizarTimer, 1000);
             
             inicializarCenario();
             configurarSuporteTouch();
+        }
+
+        function atualizarTimer() {
+            const segundosDecorridos = Math.floor((Date.now() - startTime) / 1000);
+            const mins = String(Math.floor(segundosDecorridos / 60)).padStart(2, '0');
+            const secs = String(segundosDecorridos % 60).padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${mins}:${secs}`;
         }
 
         // --- MECÂNICA DE ARRASTAR E SOLTAR (DESKTOP) ---
@@ -311,7 +330,7 @@
 
                 const slotRect = slot.getBoundingClientRect();
                 
-                // Zona de Atração Magnética Visual (Tolerance de 50px)
+                // Zona de Atração Magnética (Tolerância de 50px)
                 const tolerance = 50;
                 const isWithinX = touch.clientX >= (slotRect.left - tolerance) && touch.clientX <= (slotRect.right + tolerance);
                 const isWithinY = touch.clientY >= (slotRect.top - tolerance) && touch.clientY <= (slotRect.bottom + tolerance);
@@ -328,7 +347,6 @@
                 const slotRect = slot.getBoundingClientRect();
                 slot.classList.remove('hover');
 
-                // Lógica de Colisão com Tolerância Expandida (50px para cada lado)
                 const tolerance = 50;
                 const isWithinX = touch.clientX >= (slotRect.left - tolerance) && touch.clientX <= (slotRect.right + tolerance);
                 const isWithinY = touch.clientY >= (slotRect.top - tolerance) && touch.clientY <= (slotRect.bottom + tolerance);
@@ -336,11 +354,10 @@
                 if (isWithinX && isWithinY) {
                     instalarBomba();
                 } else {
-                    // Volta a bomba pro inventário
                     bomba.style.position = 'static';
                     bomba.style.zIndex = 'auto';
                     bomba.style.width = 'auto';
-                    bomba.style.margin = '0 0 10px 0';
+                    bomba.style.margin = '0';
                 }
             });
         }
@@ -356,7 +373,9 @@
                 slot.innerHTML = '<div class="placed-pump" onclick="abrirConfig()">Bomba Instalada<br>(Toque p/ Configurar)</div>';
                 slot.style.border = "none";
                 slot.style.background = "transparent";
-                slot.style.transform = "scale(1)"; 
+                
+                // Exibe botão de simulação discretamente no topo esquerdo conforme especificado
+                document.getElementById('btn-simular').style.display = 'block';
                 
                 abrirConfig(); 
             }
@@ -381,7 +400,7 @@
             pumpConfig.atp = atp;
             pumpConfig.dir = dir;
             document.getElementById('config-modal').style.display = 'none';
-            document.querySelector('.placed-pump').innerHTML = 'Bomba Ativa<br>(Configurada)';
+            document.querySelector('.placed-pump').innerHTML = '⚡ Bomba Ativa<br>(Configurada)';
             document.querySelector('.placed-pump').style.background = '#27ae60';
         }
 
@@ -399,8 +418,8 @@
             setTimeout(() => {
                 const w = container.clientWidth - 30;
                 const h = container.clientHeight - 30;
-                const left = (Math.random() * w) + 10;
-                const top = (Math.random() * h) + 10;
+                const left = (Math.random() * w) + 15;
+                const top = (Math.random() * h) + 5;
                 
                 ion.style.left = left + 'px';
                 ion.style.top = top + 'px';
@@ -413,12 +432,12 @@
         // --- MOTOR LÓGICO (Processo, Falha, Solução e Gamificação) ---
         function executarSimulacao() {
             if (!isPumpPlaced) {
-                alert("Nenhuma estrutura instalada na membrana! Instale a Bomba de Íons primeiro.");
+                alert("Nenhuma estrutura instalada na membrana!");
                 return;
             }
             
             if (!pumpConfig.atp || !pumpConfig.dir) {
-                alert("A Bomba está instalada, mas sem configuração. Clique nela para configurar.");
+                alert("Configure os parâmetros da bomba clicando sobre ela.");
                 return;
             }
 
@@ -429,7 +448,7 @@
 
             setTimeout(() => {
                 if (atpAtivo && contraGradiente) {
-                    // SUCESSO: Cálculo do Tempo e Rank
+                    clearInterval(timerInterval);
                     const tempoGasto = Math.floor((Date.now() - startTime) / 1000);
                     let rankText, rankIcon;
                     
@@ -446,32 +465,27 @@
 
                     sessionData.log.tempo_conclusao_segundos = tempoGasto;
                     sessionData.log.rank = rankText;
-                    sessionData.log.saida = 'Sucesso: Homeostase atingida. Transporte ativo configurado corretamente e evitou a lise por choque hipotônico.';
+                    sessionData.log.saida = 'Sucesso: Homeostase atingida. Transporte ativo configurado corretamente.';
                     
                     mostrarFeedback(true, 'Homeostase Atingida!', 
-                        `Excelente! Você configurou a bomba usando ATP para bombear solutos contra o gradiente, reduzindo a pressão osmótica e salvando a célula do choque hipotônico.`, 
+                        `Excelente! Você configurou a bomba usando ATP para bombear solutos contra o gradiente, evitando o choque hipotônico.`, 
                         { rank: rankText, icone: rankIcon, tempo: tempoGasto }
                     );
                     salvarPersistencia();
                 } else {
-                    // FALHA: Acúmulo e Lise
                     failCount++;
-                    let motivo = !atpAtivo ? "Tentou usar difusão, o que não gera energia para bombear solutos contra o gradiente e reduzir a pressão osmótica interna." : "Bombeou os íons a favor do gradiente (para dentro), aumentando ainda mais a pressão osmótica interna.";
+                    let motivo = !atpAtivo ? "Tentou usar difusão, o que não gera energia para bombear solutos contra o gradiente." : "Bombeou os íons a favor do gradiente, agravando a pressão osmótica.";
                     sessionData.log.falhas.push({ tentativa: failCount, config: {...pumpConfig}, motivo: motivo, tempo_relativo: Math.floor((Date.now() - startTime)/1000) });
                     
                     document.getElementById('intracellular').classList.add('lysis-animation');
                     
-                    mostrarFeedback(false, 'Falha: Lise Celular', 'A célula colapsou por entrada excessiva de água (osmose) causando lise.<br><br>Diagnóstico de Troubleshooting: ' + motivo);
+                    mostrarFeedback(false, 'Falha: Lise Celular', 'A célula colapsou por entrada excessiva de água (osmose).<br><br>Diagnóstico: ' + motivo);
                 }
             }, 1500);
         }
 
         function animarIons(atpAtivo, contraGradiente) {
-            const intra = document.getElementById('intracellular');
-            if (!atpAtivo || !contraGradiente) {
-                // Falha visual: lise (a classe é adicionada no setTimeout)
-            } else {
-                // Sucesso: Move íons para fora (meio extracelular)
+            if (atpAtivo && contraGradiente) {
                 const extra = document.getElementById('extracellular');
                 criarIon(extra, true);
                 criarIon(extra, true);
@@ -510,9 +524,8 @@
             document.getElementById('feedback-overlay').style.display = 'none';
             document.getElementById('intracellular').classList.remove('lysis-animation');
             const intra = document.getElementById('intracellular');
-            // Reset do texto preservando o rigor biológico
             intra.innerHTML = 'Meio Intracelular (Alta Pressão Osmótica - Perigo de Lise)';
-            inicializarCenario(); // Recria íons
+            inicializarCenario();
         }
 
         function salvarPersistencia() {
