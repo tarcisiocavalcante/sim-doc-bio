@@ -157,8 +157,8 @@
         <div id="sidebar">
             <div class="briefing">
                 <strong>Briefing Operacional:</strong><br><br>
-                Durante um mergulho no mar (ambiente altamente hipertônico), a célula sofreu um influxo drástico de íons de Sódio (Na+).<br><br>
-                <strong>Missão:</strong> Estabilize o meio intracelular utilizando o equipamento adequado. Impeça a lise celular antes que a pressão osmótica destrua a membrana.<br><br>
+                Após a exposição a um ambiente altamente hipotônico (baixa concentração externa, como água destilada), a água começou a inundar o meio intracelular por osmose.<br><br>
+                <strong>Missão:</strong> Estabilize o meio intracelular utilizando o equipamento adequado. Use a Bomba de Íons para bombear solutos para fora, regulando o volume interno e evitando a lise celular antes que a pressão osmótica destrua a membrana.<br><br>
                 <em>Referência: MATRIZ_20_SIMULACOES.xlsx</em>
             </div>
             
@@ -178,7 +178,7 @@
                 <button id="btn-simular" class="btn btn-primary" onclick="executarSimulacao()">Executar Simulação</button>
             </div>
 
-            <div id="extracellular">Meio Extracelular (Água do Mar - Alta Concentração Na+)</div>
+            <div id="extracellular">Meio Extracelular (Ambiente Hipotônico - Baixa Concentração)</div>
             
             <div id="membrane-zone">
                 <div id="slot" class="drop-target" ondrop="drop(event)" ondragover="allowDrop(event)">
@@ -186,7 +186,7 @@
                 </div>
             </div>
             
-            <div id="intracellular">Meio Intracelular (Perigo de Acúmulo e Lise)</div>
+            <div id="intracellular">Meio Intracelular (Alta Pressão Osmótica - Perigo de Lise)</div>
         </div>
     </div>
 
@@ -227,7 +227,7 @@
         let sessionData = {
             aluno: {},
             log: {
-                entrada: 'Tema 1 - Firewall da Membrana (Mergulho)',
+                entrada: 'Tema 1 - Firewall da Membrana (Choque Hipotônico)',
                 falhas: [],
                 saida: null,
                 tempo_conclusao_segundos: null,
@@ -386,8 +386,8 @@
 
         // --- GERADOR DE ÍONS VISUAIS ---
         function inicializarCenario() {
-            const extra = document.getElementById('extracellular');
-            for(let i=0; i<15; i++) { criarIon(extra, true); }
+            const intra = document.getElementById('intracellular');
+            for(let i=0; i<15; i++) { criarIon(intra, false); }
         }
 
         function criarIon(container, isExtra) {
@@ -445,22 +445,22 @@
 
                     sessionData.log.tempo_conclusao_segundos = tempoGasto;
                     sessionData.log.rank = rankText;
-                    sessionData.log.saida = 'Sucesso: Homeostase atingida. Transporte ativo configurado corretamente e sobreviveu ao mergulho.';
+                    sessionData.log.saida = 'Sucesso: Homeostase atingida. Transporte ativo configurado corretamente e evitou a lise por choque hipotônico.';
                     
                     mostrarFeedback(true, 'Homeostase Atingida!', 
-                        `Excelente! Você configurou a bomba usando ATP para bombear o Na+ contra o gradiente de concentração, salvando a célula da ruptura.`, 
+                        `Excelente! Você configurou a bomba usando ATP para bombear solutos contra o gradiente, reduzindo a pressão osmótica e salvando a célula do choque hipotônico.`, 
                         { rank: rankText, icone: rankIcon, tempo: tempoGasto }
                     );
                     salvarPersistencia();
                 } else {
                     // FALHA: Acúmulo e Lise
                     failCount++;
-                    let motivo = !atpAtivo ? "Tentou usar difusão simples/facilitada para íons que já estão em excesso no meio externo (água do mar)." : "Bombeou os íons a favor do gradiente, inundando a célula de forma ativa.";
+                    let motivo = !atpAtivo ? "Tentou usar difusão, o que não gera energia para bombear solutos contra o gradiente e reduzir a pressão osmótica interna." : "Bombeou os íons a favor do gradiente (para dentro), aumentando ainda mais a pressão osmótica interna.";
                     sessionData.log.falhas.push({ tentativa: failCount, config: {...pumpConfig}, motivo: motivo, tempo_relativo: Math.floor((Date.now() - startTime)/1000) });
                     
                     document.getElementById('intracellular').classList.add('lysis-animation');
                     
-                    mostrarFeedback(false, 'Falha: Lise Celular', 'A célula colapsou por acúmulo de Na+ e entrada excessiva de água (osmose).<br><br>Diagnóstico de Troubleshooting: ' + motivo);
+                    mostrarFeedback(false, 'Falha: Lise Celular', 'A célula colapsou por entrada excessiva de água (osmose) causando lise.<br><br>Diagnóstico de Troubleshooting: ' + motivo);
                 }
             }, 1500);
         }
@@ -468,8 +468,9 @@
         function animarIons(atpAtivo, contraGradiente) {
             const intra = document.getElementById('intracellular');
             if (!atpAtivo || !contraGradiente) {
-                for(let i=0; i<8; i++) { criarIon(intra, false); }
+                // Falha: Lise
             } else {
+                // Sucesso: Move íons para fora
                 const extra = document.getElementById('extracellular');
                 criarIon(extra, true);
                 criarIon(extra, true);
@@ -508,7 +509,7 @@
             document.getElementById('feedback-overlay').style.display = 'none';
             document.getElementById('intracellular').classList.remove('lysis-animation');
             const intra = document.getElementById('intracellular');
-            intra.innerHTML = 'Meio Intracelular (Perigo de Acúmulo e Lise)';
+            intra.innerHTML = 'Meio Intracelular (Alta Pressão Osmótica - Perigo de Lise)';
         }
 
         function salvarPersistencia() {
