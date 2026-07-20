@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aula Mestre: Tema 1 - Firewall da Membrana</title>
     <!-- BioEngine SIM-DOC-BIO | Engenharia de Software Educacional -->
-    <!-- Ref: MATRIZ_20_SIMULACOES.xlsx -->
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -16,11 +14,12 @@
             --cell-in: #dff9fb;
             --cell-out: #c7ecee;
             --membrane: #f39c12;
+            --gold: #f1c40f;
         }
         
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; touch-action: manipulation; }
         
-        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--primary); height: 100vh; overflow: hidden; /* Evita pull-to-refresh mobile */ touch-action: none; }
+        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--primary); height: 100vh; overflow: hidden; touch-action: none; }
 
         /* --- TELA DE LOGIN --- */
         #login-screen {
@@ -50,14 +49,18 @@
         .draggable-item {
             background: var(--primary); color: white; padding: 10px; text-align: center; border-radius: 4px;
             cursor: grab; margin-bottom: 10px; user-select: none; font-size: 12px; font-weight: bold;
-            touch-action: none; /* Fundamental para touch events customizados funcionarem sem scroll */
+            touch-action: none;
         }
         .draggable-item:active { cursor: grabbing; }
 
-        #btn-simular { background: var(--primary); color: white; margin-top: 20px; }
-
         /* Área Principal */
         #main-area { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 10; }
+        
+        /* Controles Superiores */
+        #top-controls { background: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 15; }
+        #top-controls h3 { margin: 0; font-size: 16px; color: var(--primary); }
+        #btn-simular { background: var(--primary); color: white; width: auto; padding: 10px 30px; margin: 0; }
+        
         #extracellular { flex: 1; background: var(--cell-out); display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; font-weight: bold; color: #555; position: relative;}
         #intracellular { flex: 1; background: var(--cell-in); display: flex; justify-content: center; align-items: flex-start; padding-top: 20px; font-weight: bold; color: #555; position: relative; overflow: hidden;}
         
@@ -101,19 +104,27 @@
         .feedback-box { background: white; padding: 30px; border-radius: 8px; text-align: center; max-width: 400px; width: 90%; }
         .feedback-box.fail h2 { color: var(--danger); }
         .feedback-box.success h2 { color: var(--secondary); }
+        
+        .rank-badge {
+            display: inline-block; padding: 10px 20px; margin: 15px 0; border-radius: 50px;
+            font-size: 18px; font-weight: bold; background-color: var(--bg-color); color: var(--primary);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); border: 2px solid var(--gold);
+        }
 
         /* Animação de Lise */
         .lysis-animation { animation: shake 0.5s infinite, expand 2s forwards; }
         @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
         @keyframes expand { to { background-color: #ffb8b8; } }
 
-        /* RESPONSIVIDADE PARA SMARTPHONES (Suporte Híbrido Mobile) */
+        /* RESPONSIVIDADE PARA SMARTPHONES */
         @media (max-width: 768px) {
             #workspace { flex-direction: column; }
+            #top-controls { padding: 10px; }
+            #top-controls h3 { font-size: 14px; }
+            #btn-simular { padding: 8px 15px; font-size: 12px; }
             #sidebar { width: 100%; border-right: none; border-bottom: 2px solid #ddd; padding: 10px; display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: stretch; height: auto; max-height: 40vh; overflow-y: auto; }
             .briefing { margin-bottom: 10px; width: 100%; font-size: 12px; padding: 10px; }
-            .inventory { width: 48%; min-height: 80px; padding: 5px; }
-            #btn-simular { width: 48%; margin-top: 0; align-self: center; height: 100%; min-height: 80px;}
+            .inventory { width: 100%; min-height: 80px; padding: 5px; }
         }
     </style>
 </head>
@@ -142,28 +153,32 @@
 
     <!-- WORKSPACE -->
     <div id="workspace">
-        <!-- Sidebar -->
+        <!-- Lateral -->
         <div id="sidebar">
             <div class="briefing">
-                <strong>Briefing Operacional:</strong><br>
-                Estabilize o meio intracelular. Impeça a lise celular por excesso de íons Na+.<br>
+                <strong>Briefing Operacional:</strong><br><br>
+                Durante um mergulho no mar (ambiente altamente hipertônico), a célula sofreu um influxo drástico de íons de Sódio (Na+).<br><br>
+                <strong>Missão:</strong> Estabilize o meio intracelular utilizando o equipamento adequado. Impeça a lise celular antes que a pressão osmótica destrua a membrana.<br><br>
                 <em>Referência: MATRIZ_20_SIMULACOES.xlsx</em>
             </div>
             
             <div class="inventory">
                 <h3>Equipamentos</h3>
-                <!-- Configurado para Drag and Drop nativo e Touch Events Customizados -->
                 <div class="draggable-item" draggable="true" id="bomba-ions" ondragstart="drag(event)">
                     Bomba de Íons
                 </div>
             </div>
-
-            <button id="btn-simular" class="btn" onclick="executarSimulacao()">Simular</button>
         </div>
 
         <!-- Área Principal -->
         <div id="main-area">
-            <div id="extracellular">Meio Extracelular (Alta Concentração Na+)</div>
+            <!-- Controles Superiores -->
+            <div id="top-controls">
+                <h3>Modo de Solução de Problemas (Troubleshooting)</h3>
+                <button id="btn-simular" class="btn btn-primary" onclick="executarSimulacao()">Executar Simulação</button>
+            </div>
+
+            <div id="extracellular">Meio Extracelular (Água do Mar - Alta Concentração Na+)</div>
             
             <div id="membrane-zone">
                 <div id="slot" class="drop-target" ondrop="drop(event)" ondragover="allowDrop(event)">
@@ -171,7 +186,7 @@
                 </div>
             </div>
             
-            <div id="intracellular">Meio Intracelular (Perigo de Acúmulo)</div>
+            <div id="intracellular">Meio Intracelular (Perigo de Acúmulo e Lise)</div>
         </div>
     </div>
 
@@ -201,6 +216,7 @@
     <div id="feedback-overlay">
         <div id="feedback-content" class="feedback-box">
             <h2 id="feedback-title">Resultado</h2>
+            <div id="feedback-rank-container" style="display: none;"></div>
             <p id="feedback-msg">Mensagem...</p>
             <button class="btn btn-primary" id="btn-feedback" onclick="fecharFeedback()">Continuar</button>
         </div>
@@ -211,9 +227,11 @@
         let sessionData = {
             aluno: {},
             log: {
-                entrada: 'Tema 1 - Firewall da Membrana',
+                entrada: 'Tema 1 - Firewall da Membrana (Mergulho)',
                 falhas: [],
-                saida: null
+                saida: null,
+                tempo_conclusao_segundos: null,
+                rank: null
             },
             status_sincronizacao: 'pendente'
         };
@@ -222,6 +240,9 @@
         let pumpConfig = { atp: null, dir: null };
         let failCount = 0;
         let ions = [];
+        
+        // Timer Invisível
+        let startTime = null;
 
         // --- SISTEMA DE LOGIN ---
         function iniciarSessao() {
@@ -238,20 +259,16 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('workspace').style.display = 'flex';
             
+            // Inicia o cronômetro silenciamente
+            startTime = Date.now();
+            
             inicializarCenario();
             configurarSuporteTouch();
         }
 
         // --- MECÂNICA DE ARRASTAR E SOLTAR (DESKTOP) ---
-        function allowDrop(ev) {
-            ev.preventDefault();
-            ev.target.classList.add('hover');
-        }
-
-        function drag(ev) {
-            ev.dataTransfer.setData("text", ev.target.id);
-        }
-
+        function allowDrop(ev) { ev.preventDefault(); ev.target.classList.add('hover'); }
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
         function drop(ev) {
             ev.preventDefault();
             const slot = document.getElementById('slot');
@@ -263,22 +280,19 @@
             e.target.classList.remove('hover');
         });
 
-        // --- SUPORTE HÍBRIDO A EVENTOS DE TOQUE (MOBILE) ---
+        // --- SUPORTE HÍBRIDO A EVENTOS DE TOQUE COM TOLERÂNCIA MAGNÉTICA (MOBILE) ---
         function configurarSuporteTouch() {
             const bomba = document.getElementById('bomba-ions');
             const slot = document.getElementById('slot');
 
             bomba.addEventListener('touchstart', function(e) {
-                // Previne o comportamento padrão (scroll) para permitir movimentação livre
                 e.preventDefault();
                 const touch = e.touches[0];
                 const rect = bomba.getBoundingClientRect();
                 
-                // Calcula o offset de onde o dedo tocou no elemento
                 bomba.dataset.offsetX = touch.clientX - rect.left;
                 bomba.dataset.offsetY = touch.clientY - rect.top;
 
-                // Muda o posicionamento para fixed para flutuar pela tela
                 bomba.style.position = 'fixed';
                 bomba.style.zIndex = '1000';
                 bomba.style.width = rect.width + 'px';
@@ -294,10 +308,14 @@
                 bomba.style.left = (touch.clientX - bomba.dataset.offsetX) + 'px';
                 bomba.style.top = (touch.clientY - bomba.dataset.offsetY) + 'px';
 
-                // Verifica colisão visual com o slot
                 const slotRect = slot.getBoundingClientRect();
-                if (touch.clientX >= slotRect.left && touch.clientX <= slotRect.right &&
-                    touch.clientY >= slotRect.top && touch.clientY <= slotRect.bottom) {
+                
+                // Zona de Atração Magnética Visual (Tolerance de 50px)
+                const tolerance = 50;
+                const isWithinX = touch.clientX >= (slotRect.left - tolerance) && touch.clientX <= (slotRect.right + tolerance);
+                const isWithinY = touch.clientY >= (slotRect.top - tolerance) && touch.clientY <= (slotRect.bottom + tolerance);
+
+                if (isWithinX && isWithinY) {
                     slot.classList.add('hover');
                 } else {
                     slot.classList.remove('hover');
@@ -309,12 +327,15 @@
                 const slotRect = slot.getBoundingClientRect();
                 slot.classList.remove('hover');
 
-                // Verifica se o toque final foi solto dentro da área do slot
-                if (touch.clientX >= slotRect.left && touch.clientX <= slotRect.right &&
-                    touch.clientY >= slotRect.top && touch.clientY <= slotRect.bottom) {
+                // Lógica de Colisão com Tolerância Expandida (50px para cada lado)
+                const tolerance = 50;
+                const isWithinX = touch.clientX >= (slotRect.left - tolerance) && touch.clientX <= (slotRect.right + tolerance);
+                const isWithinY = touch.clientY >= (slotRect.top - tolerance) && touch.clientY <= (slotRect.bottom + tolerance);
+
+                if (isWithinX && isWithinY) {
                     instalarBomba();
                 } else {
-                    // Volta a bomba pro inventário (Snap back)
+                    // Volta a bomba pro inventário
                     bomba.style.position = 'static';
                     bomba.style.zIndex = 'auto';
                     bomba.style.width = 'auto';
@@ -328,15 +349,15 @@
             if (!isPumpPlaced) {
                 isPumpPlaced = true;
                 const draggable = document.getElementById('bomba-ions');
-                draggable.style.display = 'none'; // Esconde do inventário
+                draggable.style.display = 'none';
                 
                 const slot = document.getElementById('slot');
                 slot.innerHTML = '<div class="placed-pump" onclick="abrirConfig()">Bomba Instalada<br>(Toque p/ Configurar)</div>';
                 slot.style.border = "none";
                 slot.style.background = "transparent";
-                slot.style.transform = "scale(1)"; // Reset de animação do hover
+                slot.style.transform = "scale(1)"; 
                 
-                abrirConfig(); // Abre modal de configuração automaticamente como UX de agilidade
+                abrirConfig(); 
             }
         }
 
@@ -366,9 +387,7 @@
         // --- GERADOR DE ÍONS VISUAIS ---
         function inicializarCenario() {
             const extra = document.getElementById('extracellular');
-            for(let i=0; i<15; i++) {
-                criarIon(extra, true);
-            }
+            for(let i=0; i<15; i++) { criarIon(extra, true); }
         }
 
         function criarIon(container, isExtra) {
@@ -376,7 +395,6 @@
             ion.className = 'na-ion';
             ion.innerText = 'Na+';
             
-            // Timeout curto pra dar tempo do render gerar dimensões exatas na tela do celular
             setTimeout(() => {
                 const w = container.clientWidth - 30;
                 const h = container.clientHeight - 30;
@@ -391,7 +409,7 @@
             }, 50);
         }
 
-        // --- MOTOR LÓGICO (Processo, Falha, Solução) ---
+        // --- MOTOR LÓGICO (Processo, Falha, Solução e Gamificação) ---
         function executarSimulacao() {
             if (!isPumpPlaced) {
                 alert("Nenhuma estrutura instalada na membrana! Instale a Bomba de Íons primeiro.");
@@ -403,7 +421,6 @@
                 return;
             }
 
-            // Lógica Central do Tema 1
             const atpAtivo = pumpConfig.atp === 'sim';
             const contraGradiente = pumpConfig.dir === 'contra';
 
@@ -411,33 +428,48 @@
 
             setTimeout(() => {
                 if (atpAtivo && contraGradiente) {
-                    // SUCESSO: Homeostase
-                    sessionData.log.saida = 'Sucesso: Homeostase atingida. Transporte ativo configurado corretamente.';
-                    mostrarFeedback(true, 'Homeostase Atingida!', 'Excelente! Você configurou a bomba usando ATP para bombear o Na+ contra o gradiente de concentração, salvando a célula da lise.');
+                    // SUCESSO: Cálculo do Tempo e Rank
+                    const tempoGasto = Math.floor((Date.now() - startTime) / 1000);
+                    let rankText, rankIcon;
+                    
+                    if (tempoGasto <= 45) {
+                        rankText = "Master";
+                        rankIcon = "🏆";
+                    } else if (tempoGasto <= 90) {
+                        rankText = "Intermediário";
+                        rankIcon = "⭐";
+                    } else {
+                        rankText = "Iniciante";
+                        rankIcon = "🌱";
+                    }
+
+                    sessionData.log.tempo_conclusao_segundos = tempoGasto;
+                    sessionData.log.rank = rankText;
+                    sessionData.log.saida = 'Sucesso: Homeostase atingida. Transporte ativo configurado corretamente e sobreviveu ao mergulho.';
+                    
+                    mostrarFeedback(true, 'Homeostase Atingida!', 
+                        `Excelente! Você configurou a bomba usando ATP para bombear o Na+ contra o gradiente de concentração, salvando a célula da ruptura.`, 
+                        { rank: rankText, icone: rankIcon, tempo: tempoGasto }
+                    );
                     salvarPersistencia();
                 } else {
                     // FALHA: Acúmulo e Lise
                     failCount++;
-                    let motivo = !atpAtivo ? "Tentou usar difusão simples/facilitada para íons em excesso no meio externo." : "Bambeou os íons a favor do gradiente, inundando a célula de forma ativa.";
-                    sessionData.log.falhas.push({ tentativa: failCount, config: {...pumpConfig}, motivo: motivo });
+                    let motivo = !atpAtivo ? "Tentou usar difusão simples/facilitada para íons que já estão em excesso no meio externo (água do mar)." : "Bombeou os íons a favor do gradiente, inundando a célula de forma ativa.";
+                    sessionData.log.falhas.push({ tentativa: failCount, config: {...pumpConfig}, motivo: motivo, tempo_relativo: Math.floor((Date.now() - startTime)/1000) });
                     
                     document.getElementById('intracellular').classList.add('lysis-animation');
                     
-                    mostrarFeedback(false, 'Falha: Lise Celular', 'A célula colapsou por acúmulo de Na+ e entrada excessiva de água (osmose).<br><br>Diagnóstico: ' + motivo);
+                    mostrarFeedback(false, 'Falha: Lise Celular', 'A célula colapsou por acúmulo de Na+ e entrada excessiva de água (osmose).<br><br>Diagnóstico de Troubleshooting: ' + motivo);
                 }
             }, 1500);
         }
 
         function animarIons(atpAtivo, contraGradiente) {
             const intra = document.getElementById('intracellular');
-            
             if (!atpAtivo || !contraGradiente) {
-                // Erro: Íons entram na célula
-                for(let i=0; i<8; i++) {
-                    criarIon(intra, false);
-                }
+                for(let i=0; i<8; i++) { criarIon(intra, false); }
             } else {
-                // Sucesso: Mais íons movidos para o meio extracelular
                 const extra = document.getElementById('extracellular');
                 criarIon(extra, true);
                 criarIon(extra, true);
@@ -445,14 +477,22 @@
         }
 
         // --- SISTEMA DE FEEDBACK E PERSISTÊNCIA ---
-        function mostrarFeedback(isSuccess, title, msg) {
+        function mostrarFeedback(isSuccess, title, msg, ranking = null) {
             const overlay = document.getElementById('feedback-overlay');
             const box = document.getElementById('feedback-content');
+            const rankContainer = document.getElementById('feedback-rank-container');
             
             overlay.style.display = 'flex';
             box.className = 'feedback-box ' + (isSuccess ? 'success' : 'fail');
             document.getElementById('feedback-title').innerText = title;
             document.getElementById('feedback-msg').innerHTML = msg;
+            
+            if (isSuccess && ranking) {
+                rankContainer.style.display = 'block';
+                rankContainer.innerHTML = `<div class="rank-badge">Rank: ${ranking.rank} ${ranking.icone} <br><span style="font-size:12px; font-weight:normal;">Tempo: ${ranking.tempo} segundos</span></div>`;
+            } else {
+                rankContainer.style.display = 'none';
+            }
             
             const btn = document.getElementById('btn-feedback');
             if (isSuccess) {
@@ -467,20 +507,17 @@
         function resetarTentativa() {
             document.getElementById('feedback-overlay').style.display = 'none';
             document.getElementById('intracellular').classList.remove('lysis-animation');
-            // Remove íons extras que entraram pela falha
             const intra = document.getElementById('intracellular');
-            intra.innerHTML = 'Meio Intracelular (Perigo de Acúmulo)';
+            intra.innerHTML = 'Meio Intracelular (Perigo de Acúmulo e Lise)';
         }
 
         function salvarPersistencia() {
-            // Regra Offline-First: Salvar JSON silenciosamente no localStorage
             const key = 'sim_doc_bio_sync_' + sessionData.aluno.matricula + '_' + Date.now();
             const dataString = JSON.stringify(sessionData);
             
             try {
                 localStorage.setItem(key, dataString);
-                console.log("[SIM-DOC-BIO] Dados salvos localmente com sucesso no localStorage.");
-                console.log("Carga útil armazenada para sincronização espelho:", dataString);
+                console.log("[SIM-DOC-BIO] Dados salvos no localStorage (Offline-First). Status: Pendente.");
             } catch (e) {
                 console.error("Erro ao salvar no localStorage: ", e);
             }
@@ -488,5 +525,3 @@
     </script>
 </body>
 </html>
-
-```
